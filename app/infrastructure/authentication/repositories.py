@@ -1,4 +1,5 @@
-from app.run import db
+from app import db
+from app.domain.authentication.entities import User
 from app.domain.authentication.repositories import UserRepository
 
 

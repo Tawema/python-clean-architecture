@@ -1,5 +1,5 @@
 from flask_jwt_extended import create_access_token, create_refresh_token
-from app.run import bcrypt
+from app import bcrypt
 from app.domain.authentication.services import SessionService, HashingService
 
 

@@ -1,3 +1,6 @@
+from app.domain.authentication.entities import User
+
+
 class UserRepository:
     def save(self, user):
         raise NotImplementedError

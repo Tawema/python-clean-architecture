@@ -30,13 +30,13 @@ class ResponseFailure(object):
             "{} : {}".format(err['parameter'], err['message'])
             for err in request.errors
         ])
-        return cls(VALIDATION_ERROR, result)
+        return cls(cls.VALIDATION_ERROR, result)
 
     @classmethod
     def build_from_system_error(cls, error):
         if isinstance(error, Exception):
-            return cls(SYSTEM_ERROR, "{} : {}".format(error.__class__.__name__,
-                                                      str(error)))
+            return cls(cls.SYSTEM_ERROR,
+                       "{} : {}".format(error.__class__.__name__, str(error)))
         return None
 
     @classmethod
@@ -46,3 +46,7 @@ class ResponseFailure(object):
                 ["{} : {}".format(key, value) for key, value in adict])
             return cls(VALIDATION_ERROR, result)
         return None
+
+    @property
+    def value(self):
+        return {'type': self.type, 'message': self.message}
