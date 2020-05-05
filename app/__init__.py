@@ -3,6 +3,13 @@ from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 import json
+import app.shared.response as res
+
+STATUS_CODE = {
+    res.ResponseFailure.VALIDATION_ERROR: 422,
+    res.ResponseSuccess.SUCCESS: 201,
+    res.ResponseFailure.SYSTEM_ERROR: 500
+}
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key'
@@ -23,4 +30,4 @@ def register():
         RegisterUserRequest.build_from_dict(request.json))
     return Response(json.dumps(result.value),
                     mimetype="application/json",
-                    status=200)
+                    status=STATUS_CODE[result.type])

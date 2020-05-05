@@ -1,3 +1,6 @@
+from .validation import ValidationService, EmailRule, RequiredRule, MinLengthRule
+
+
 class ValidRequest(object):
     def __init__(self, adict):
         self.attrs = adict
@@ -17,13 +20,21 @@ class ValidRequest(object):
 
 
 class InvalidRequest(object):
-    errors = []
+    def __init__(self, errors=[]):
+        self.errors = errors
 
     def has_errors(self):
         return len(self.errors) > 0
 
     def add_error(self, parameter: str, message: str):
         self.errors.append({'parameter': parameter, 'message': message})
+
+    @classmethod
+    def from_dict(cls, errors):
+        cls_errors = []
+        for parameter, messages in errors.items():
+            cls_errors.append({'parameter': parameter, 'message': messages})
+        return cls(cls_errors)
 
     def __nonzero__(self):
         return False
@@ -39,19 +50,29 @@ class RegisterUserRequest(ValidRequest):
             invalid_request.add_error("email", "No field specified")
             return invalid_request
 
-        if adict.get('username', None) is None or adict['username'] == '':
-            invalid_request.add_error("username",
-                                      "The username cannot be empty")
-        print(adict.get('username', None) is None)
+        validation_service = ValidationService(adict)
+        validation_service.add_rules({
+            'username': [RequiredRule.build()],
+            'email': [RequiredRule.build(), EmailRule()],
+            'password': [RequiredRule.build(),
+                         MinLengthRule.build(6)]
+        })
+        invalid_request = InvalidRequest.from_dict(
+            validation_service.validate())
 
-        if adict.get('email', None) is None or adict[
-                'email'] == '' or "@" not in adict['email']:
-            invalid_request.add_error("email", "The email is invalid")
+        # if adict.get('username', None) is None or adict['username'] == '':
+        # invalid_request.add_error("username",
+        # "The username cannot be empty")
+        # print(adict.get('username', None) is None)
 
-        if adict.get('password',
-                     None) is None or adict['password'] == '' or len(
-                         adict['password']) < 6:
-            invalid_request.add_error("password", "The password is weak")
+        # if adict.get('email', None) is None or adict[
+        # 'email'] == '' or "@" not in adict['email']:
+        # invalid_request.add_error("email", "The email is invalid")
+
+        # if adict.get('password',
+        # None) is None or adict['password'] == '' or len(
+        # adict['password']) < 6:
+        # invalid_request.add_error("password", "The password is weak")
 
         if invalid_request.has_errors():
             return invalid_request

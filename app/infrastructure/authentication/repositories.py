@@ -16,17 +16,23 @@ class FlaskUserRepository(UserRepository):
         self.hashing_service = hashing_service
 
     def save(self, user):
-        return FlaskUser.create(username=user.username,
-                                email=user.email,
-                                password=self.hashing_service.hash(
-                                    user.password))
+        user = FlaskUser(username=user.username,
+                         email=user.email,
+                         password=self.hashing_service.hash(user.password))
+        db.session.add(user)
+        db.session.commit()
+        return user
 
     def exists_with_email(self, email: str) -> bool:
-        return len(FlaskUser.query.filter_by(email=email)) > 0
+        return FlaskUser.query.filter_by(email=email).count() > 0
 
     def get_user_with_email_and_password(self, email: str,
                                          password: str) -> User:
         user = FlaskUser.query.filter_by(email=email).first()
-        if user:
-            return self.hashing_service.check(user.password, password)
+        if not user:
+            return None
+
+        if self.hashing_service.check(user.password, password):
+            return user
+
         return None

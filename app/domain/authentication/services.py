@@ -7,5 +7,5 @@ class HashingService:
     def hash(self, to_hash):
         raise NotImplementedError
 
-    def hash(self, hashed, to_check):
+    def check(self, hashed, to_check):
         raise NotImplementedError
